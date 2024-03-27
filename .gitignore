@@ -174,5 +174,9 @@ dist
 # Finder (MacOS) folder config
 .DS_Store
 
+# Ignore
+*.ignore
+*.local
+
 # Kona-specific working files
 storage/
