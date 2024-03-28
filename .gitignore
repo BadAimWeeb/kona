@@ -177,6 +177,7 @@ dist
 # Ignore
 *.ignore
 *.local
+.vscode/
 
 # Kona-specific working files
 storage/
