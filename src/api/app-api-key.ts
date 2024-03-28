@@ -5,8 +5,10 @@ export default async function MasterAPIKey(url: URL, request: Request) {
     if (!request.headers.has("Authorization"))
         return generateErrorResponse(3, "Missing Authorization header", 401);
 
-    if (process.env.MASTER_API_KEY && request.headers.get("Authorization") !== `Bearer ${process.env.MASTER_API_KEY}`)
+    if (!process.env.MASTER_API_KEY || request.headers.get("Authorization") !== `Bearer ${process.env.MASTER_API_KEY}`) {
+        console.log(request.headers.get("Authorization"), `Bearer ${process.env.MASTER_API_KEY}`);
         return generateErrorResponse(4, "Invalid Authorization header", 401);
+    }
 
     switch (request.method) {
         case "POST":

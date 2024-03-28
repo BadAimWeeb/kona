@@ -1,4 +1,4 @@
-openapi: 3.0.3
+openapi: 3.1.0
 info:
   title: Kona API Specification
   description: |-
@@ -13,7 +13,7 @@ servers:
   - url: https
 tags:
   - name: master
-    description: Endpoint only master API key can use
+    description: Endpoint only master API key can use, authenticate with value configured at `MASTER_API_KEY` in the server.
 paths:
   /api/app-api-key:
     post:
@@ -32,16 +32,41 @@ paths:
                 properties:
                   key:
                     type: string
-                    default: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+                    description: New API key
                   uuid:
                     type: string
                     format: uuid
+                    description: ID of the new API key
+                examples:
+                  - key: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+                    uuid: 144bb86e-be58-411c-be94-35ca1df5515e
         '401':
           description: Invalid Authorization header
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
 components:
   securitySchemes:
     api_key:
       type: http
       scheme: Bearer
+  schemas:
+    error:
+      type: object
+      properties:
+        error:
+          type: string
+          description: Error message
+        error_code:
+          type: integer
+          description: Error code
+        kona_version:
+          type: string
+          description: Kona version this server is running
+      examples:
+        - error: Some error message
+          error_code: 1
+          kona_version: 0.0.1
 security: 
 - api_key: []

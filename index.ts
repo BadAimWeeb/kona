@@ -1,6 +1,11 @@
+import fs from "fs";
 import packageJSON from "./package.json";
 import { handleRouter } from "./src/api-router";
 import { generateErrorResponse } from "./src/utils";
+import Swagger from "swagger-ui-dist";
+import path from "path";
+
+const SwaggerPath = Swagger.getAbsoluteFSPath();
 
 const httpServer = Bun.serve({
     async fetch(request) {
@@ -34,9 +39,56 @@ const httpServer = Bun.serve({
             let newRequestURL = new URL(requestURL.href.replace("/api/", "/"));
 
             try {
-                return handleRouter(newRequestURL, request);
+                let api = await handleRouter(newRequestURL, request);
+                api.headers.set("access-control-allow-origin", "*");
+
+                return api;
             } catch {
                 return generateErrorResponse(1, "API not found", 404);
+            }
+        }
+
+        if (requestURL.pathname === "/openapi.yaml") {
+            let oapi = fs.readFileSync("./openapi.yaml", "utf-8");
+            return new Response(oapi.replace("- url: https", `- url: ${requestURL.protocol}//${requestURL.hostname}${requestURL.port !== (requestURL.protocol === "https:" ? "443" : "80") ? ":" + requestURL.port : ""}`), {
+                headers: { 'content-type': 'application/yaml', 'access-control-allow-origin': '*' }
+            });
+        }
+
+        // this code kinda sucks
+        if (requestURL.pathname.startsWith("/docs/") || requestURL.pathname === "/docs") {
+            if (requestURL.pathname === "/docs/swagger-initializer.js") {
+                return new Response(`
+                    window.onload = function() {
+                        window.ui = SwaggerUIBundle({
+                            url: "${requestURL.protocol}//${requestURL.hostname}${requestURL.port !== (requestURL.protocol === "https:" ? "443" : "80") ? ":" + requestURL.port : ""}/openapi.yaml",
+                            dom_id: '#swagger-ui',
+                            deepLinking: true,
+                            presets: [
+                                SwaggerUIBundle.presets.apis,
+                                SwaggerUIStandalonePreset
+                            ],
+                            plugins: [
+                                SwaggerUIBundle.plugins.DownloadUrl
+                            ],
+                            layout: "StandaloneLayout"
+                        });
+                    };
+                `, {
+                    headers: { 'content-type': 'application/javascript' }
+                })
+            }
+
+            let filePath = path.join(SwaggerPath, requestURL.pathname.replace("/docs", ""));
+            if (fs.existsSync(filePath)) {
+                if (fs.statSync(filePath).isDirectory()) {
+                    filePath = path.join(filePath, "index.html");
+                    if (fs.existsSync(filePath)) {
+                        return new Response(Bun.file(filePath));
+                    }
+                } else {
+                    return new Response(Bun.file(filePath));
+                }
             }
         }
 

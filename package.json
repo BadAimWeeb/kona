@@ -11,8 +11,10 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@types/swagger-ui-dist": "^3.30.4",
     "magickwand.js": "^1.0.2",
-    "sequelize": "^6.37.1"
+    "sequelize": "^6.37.1",
+    "swagger-ui-dist": "^5.12.3"
   },
   "optionalDependencies": {
     "sqlite3": "^5.1.7"

@@ -72,7 +72,8 @@ class APIKeys extends Model<InferAttributes<APIKeys, { omit: "createdAt" | "upda
 APIKeys.init({
     uuid: {
         type: DataTypes.UUIDV4,
-        primaryKey: true
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4
     },
     key: {
         type: DataTypes.STRING,
