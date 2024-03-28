@@ -1,0 +1,47 @@
+openapi: 3.0.3
+info:
+  title: Kona API Specification
+  description: |-
+    Kona is an image processing server written in TypeScript. It has API that you can use to upload, change, delete, or do stuff that Kona server supports.
+    
+    If server enabled config `API_AUTH_ENABLED`, all request MUST have a valid `Authorization` headers in the form of Bearer token (not in format of JWT).
+  license:
+    name: MIT License
+    url: https://github.com/BadAimWeeb/kona/blob/main/LICENSE
+  version: 0.0.1
+servers:
+  - url: https
+tags:
+  - name: master
+    description: Endpoint only master API key can use
+paths:
+  /api/app-api-key:
+    post:
+      tags:
+        - master
+      summary: Create a new API key
+      description: Create a new API key that can be safely used in other applications/servers.
+      operationId: createAppAPIKey
+      responses:
+        '200':
+          description: Successful operation, will return a new API key that can be safely used in other applications/servers.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                    default: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+                  uuid:
+                    type: string
+                    format: uuid
+        '401':
+          description: Invalid Authorization header
+components:
+  securitySchemes:
+    api_key:
+      type: http
+      scheme: Bearer
+security: 
+- api_key: []

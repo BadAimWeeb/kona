@@ -11,6 +11,10 @@
   },
   "license": "MIT",
   "dependencies": {
+    "magickwand.js": "^1.0.2",
     "sequelize": "^6.37.1"
+  },
+  "optionalDependencies": {
+    "sqlite3": "^5.1.7"
   }
 }

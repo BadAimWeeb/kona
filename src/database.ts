@@ -91,3 +91,5 @@ await APIKeys.sync({
         drop: false
     }
 });
+
+export { APIKeys };
