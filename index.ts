@@ -57,6 +57,14 @@ const httpServer = Bun.serve({
 
         // this code kinda sucks
         if (requestURL.pathname.startsWith("/docs/") || requestURL.pathname === "/docs") {
+            if (requestURL.pathname === "/docs") {
+                // Redirect to /docs/
+                return new Response("", {
+                    status: 301,
+                    headers: { 'location': '/docs/' }
+                });
+            }
+
             if (requestURL.pathname === "/docs/swagger-initializer.js") {
                 return new Response(`
                     window.onload = function() {

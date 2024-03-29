@@ -15,3 +15,24 @@ export function generateErrorResponse(error: number, message: string, httpError:
         status: httpError
     });
 }
+
+export async function consumeInput(request: Request) {
+    let contentType = (request.headers.get("Content-Type") || "application/json").split(";")[0].trim();
+    let body = await request.text();
+    if (contentType === "application/json") {
+        try {
+            return JSON.parse(body);
+        } catch (e) {
+            throw new Error("Invalid JSON body");
+        }
+    } else if (contentType === "application/x-www-form-urlencoded") {
+        let output: Record<string, string> = {};
+        for (let pair of body.split("&")) {
+            let [key, value] = pair.split("=");
+            output[decodeURIComponent(key)] = decodeURIComponent(value);
+        }
+        return output;
+    } else {
+        throw new Error("Unsupported Content-Type");
+    }
+}

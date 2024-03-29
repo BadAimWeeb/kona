@@ -46,6 +46,53 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+    patch:
+      tags:
+        - master
+      summary: Revoke and create a new API key
+      description: Revoke and create a new API key.
+      operationId: updateAppAPIKey
+      requestBody:
+        description: Supplies the old API key by using either key ID or the key itself. ONLY ONE of them is required.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/master_api_key_update'
+            examples:
+              example_1:
+                value:
+                  uuid: 144bb86e-be58-411c-be94-35ca1df5515e
+              example_2:
+                value:
+                  key: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+          application/x-www-form-urlencoded:
+            schema:
+              $ref: '#/components/schemas/master_api_key_update'
+      responses:
+        '200':
+          description: Successful operation, will revoke old API key and return a new API key that can be safely used in other applications/servers.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  key:
+                    type: string
+                    description: New API key
+                  uuid:
+                    type: string
+                    format: uuid
+                    description: ID of the new API key
+                examples:
+                  - key: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+                    uuid: 144bb86e-be58-411c-be94-35ca1df5515e
+        '401':
+          description: Invalid Authorization header
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
 components:
   securitySchemes:
     api_key:
@@ -60,7 +107,14 @@ components:
           description: Error message
         error_code:
           type: integer
-          description: Error code
+          description: |-
+            Error code.
+            Possible values are:
+            - 1: Not Found
+            - 2: Unknown error
+            - 3: Missing Authorization header
+            - 4: Invalid Authorization header
+            - 5: Method not allowed
         kona_version:
           type: string
           description: Kona version this server is running
@@ -68,5 +122,18 @@ components:
         - error: Some error message
           error_code: 1
           kona_version: 0.0.1
+    master_api_key_update:
+      type: object
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: ID of the API key
+        key:
+          type: string
+          description: API key
+      examples:
+        - uuid: 144bb86e-be58-411c-be94-35ca1df5515e
+        - key: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
 security: 
 - api_key: []

@@ -1,4 +1,4 @@
-export enum Error {
+export enum ErrorCode {
     NotFound = 1,
     Unknown = 2,
     MissingAuthorization = 3,
