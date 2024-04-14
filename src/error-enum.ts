@@ -3,5 +3,6 @@ export enum ErrorCode {
     Unknown = 2,
     MissingAuthorization = 3,
     InvalidAuthorization = 4,
-    MethodNotAllowed = 5
+    MethodNotAllowed = 5,
+    InvalidContentType = 6,
 };

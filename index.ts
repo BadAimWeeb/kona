@@ -5,6 +5,15 @@ import { generateErrorResponse } from "./src/utils";
 import Swagger from "swagger-ui-dist";
 import path from "path";
 
+import { Magick } from "magickwand.js";
+
+// @ts-ignore
+import securityPolicyPath from "./src/imagemagick-security-policy.xml";
+const securityPolicyFile = Bun.file(securityPolicyPath);
+const securityPolicy = await securityPolicyFile.text();
+
+Magick.SetSecurityPolicy(securityPolicy);
+
 const SwaggerPath = Swagger.getAbsoluteFSPath();
 
 const httpServer = Bun.serve({

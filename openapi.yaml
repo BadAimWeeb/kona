@@ -4,7 +4,7 @@ info:
   description: |-
     Kona is an image processing server written in TypeScript. It has API that you can use to upload, change, delete, or do stuff that Kona server supports.
     
-    If server enabled config `API_AUTH_ENABLED`, all request MUST have a valid `Authorization` headers in the form of Bearer token (not in format of JWT).
+    If server enabled config `API_AUTH_ENABLED`, all request MUST have a valid `Authorization` headers in the form of Bearer token.
   license:
     name: MIT License
     url: https://github.com/BadAimWeeb/kona/blob/main/LICENSE
@@ -14,6 +14,8 @@ servers:
 tags:
   - name: master
     description: Endpoint only master API key can use, authenticate with value configured at `MASTER_API_KEY` in the server.
+  - name: authenticated
+    description: Endpoint that require some sort of authentication, but not necessarily master API key.
 paths:
   /api/app-api-key:
     post:
@@ -29,6 +31,9 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - key
+                  - uuid
                 properties:
                   key:
                     type: string
@@ -66,9 +71,6 @@ paths:
               example_2:
                 value:
                   key: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
-          application/x-www-form-urlencoded:
-            schema:
-              $ref: '#/components/schemas/master_api_key_update'
       responses:
         '200':
           description: Successful operation, will revoke old API key and return a new API key that can be safely used in other applications/servers.
@@ -76,6 +78,9 @@ paths:
             application/json:
               schema:
                 type: object
+                required:
+                  - key
+                  - uuid
                 properties:
                   key:
                     type: string
@@ -93,6 +98,103 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+    delete:
+      tags:
+        - master
+      summary: Delete an API key
+      description: Delete an API key.
+      operationId: deleteAppAPIKey
+      requestBody:
+        description: Supplies the API key by using either key ID or the key itself. ONLY ONE of them is required. If you want to also delete the content associated with the API key, set `content_removal` to true.
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/master_api_key_delete'
+            examples:
+              example_1:
+                value:
+                  uuid: 144bb86e-be58-411c-be94-35ca1df5515e
+              example_2:
+                value:
+                  key: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+              example_3:
+                value:
+                  uuid: 144bb86e-be58-411c-be94-35ca1df5515e
+                  content_removal: true
+      responses:
+        '200':
+          description: Successful operation, will delete the API key.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: API key deleted
+                    description: Message
+                required:
+                  - message
+        '401':
+          description: Invalid Authorization header
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+  /api/upload-image:
+    post:
+      tags: 
+        - authenticated
+      summary: Upload a new image
+      operationId: uploadNewImage
+      requestBody:
+        description: multipart/form-data MUST be used to transfer files.
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              $ref: '#/components/schemas/upload_image'
+      responses:
+        '200':
+          description: Successful operation, will return image information including revokation key.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - revokationKey
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: Image UUID
+                  owner:
+                    type: string
+                    format: uuid
+                    description: Owner UUID (a.k.a API key UUID), can be null if server does not require API key to upload
+                  revokationKey:
+                    type: string
+                    description: API key that can be used to delete the image
+              examples:
+                example_1:
+                  value:
+                    id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    owner: 144bb86e-be58-411c-be94-35ca1df5515e
+                    revokationKey: kona_ri_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+                example_2:
+                  value:
+                    id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    owner: null
+                    revokationKey: kona_ri_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+        '401':
+          description: Invalid Authorization header
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+    
 components:
   securitySchemes:
     api_key:
@@ -101,6 +203,10 @@ components:
   schemas:
     error:
       type: object
+      required:
+        - error
+        - error_code
+        - kona_version
       properties:
         error:
           type: string
@@ -115,6 +221,7 @@ components:
             - 3: Missing Authorization header
             - 4: Invalid Authorization header
             - 5: Method not allowed
+            - 6: Invalid Content-Type header
         kona_version:
           type: string
           description: Kona version this server is running
@@ -135,5 +242,32 @@ components:
       examples:
         - uuid: 144bb86e-be58-411c-be94-35ca1df5515e
         - key: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+    master_api_key_delete:
+      type: object
+      required:
+        - uuid
+        - key
+      properties:
+        uuid:
+          type: string
+          format: uuid
+          description: ID of the API key
+        key:
+          type: string
+          description: API key
+        content_removal:
+          type: boolean
+          description: |-
+            If true, the content associated with the API key will be removed.
+            If false, the content associated with the API key will be kept in orphaned state.
+      examples:
+        - uuid: 144bb86e-be58-411c-be94-35ca1df5515e
+        - key: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+    upload_image:
+      type: object
+      properties:
+        image:
+          type: string
+          format: binary
 security: 
 - api_key: []

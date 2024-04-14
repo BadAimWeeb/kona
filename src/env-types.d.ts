@@ -4,6 +4,7 @@ declare global {
             PORT?: string;
             LOCAL_STORAGE_PATH: string;
             MAX_FILE_SIZE: string;
+            SERVER_ADDRESS: string;
 
             API_AUTH_ENABLED: "true" | "false";
             MASTER_API_KEY?: string;

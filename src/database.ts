@@ -62,14 +62,14 @@ const db = (() => {
 })();
 export const Database = db;
 
-class APIKeys extends Model<InferAttributes<APIKeys, { omit: "createdAt" | "updatedAt" }>> {
+class APIKey extends Model<InferAttributes<APIKey, { omit: "createdAt" | "updatedAt" }>> {
     declare uuid: string;
     declare key: string;
     declare createdAt: CreationOptional<Date>;
     declare updatedAt: CreationOptional<Date>;
 }
 
-APIKeys.init({
+APIKey.init({
     uuid: {
         type: DataTypes.UUIDV4,
         primaryKey: true,
@@ -87,10 +87,69 @@ APIKeys.init({
     modelName: "api-keys"
 });
 
-await APIKeys.sync({
+await APIKey.sync({
     alter: {
         drop: false
     }
 });
 
-export { APIKeys };
+class Image extends Model<InferAttributes<Image, { omit: "createdAt" | "updatedAt" }>> {
+    declare id: string;
+    declare server: string;
+    declare owner: string | null;
+    declare ownerString: string | null;
+    declare revokationToken: string | null;
+    declare createdAt: CreationOptional<Date>;
+    declare updatedAt: CreationOptional<Date>;
+}
+
+Image.init({
+    id: {
+        type: DataTypes.UUIDV4,
+        primaryKey: true,
+        defaultValue: DataTypes.UUIDV4
+    },
+    server: {
+        type: DataTypes.STRING,
+        allowNull: false
+    },
+    owner: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        references: {
+            model: APIKey,
+            key: "uuid"
+        },
+        set(value: string) {
+            if (value === null) {
+                this.setDataValue("owner", null);
+                this.setDataValue("ownerString", null);
+            } else {
+                this.setDataValue("owner", value);
+                this.setDataValue("ownerString", null);
+            }
+        }
+    },
+    ownerString: {
+        type: DataTypes.STRING,
+        allowNull: true
+    },
+    revokationToken: {
+        type: DataTypes.STRING,
+        allowNull: true,
+        defaultValue: () => {
+            return "kona_ri_" + randomStuff(32);
+        }
+    }
+}, {
+    sequelize: db,
+    modelName: "images"
+});
+
+await Image.sync({
+    alter: {
+        drop: false
+    }
+});
+
+export { APIKey, Image };

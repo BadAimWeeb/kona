@@ -17,6 +17,11 @@
     "swagger-ui-dist": "^5.12.3"
   },
   "optionalDependencies": {
-    "sqlite3": "^5.1.7"
+    "mariadb": "^3.3.0",
+    "mysql2": "^3.9.3",
+    "pg": "^8.11.4",
+    "pg-hstore": "^2.3.4",
+    "sqlite3": "^5.1.7",
+    "tedious": "^18.1.0"
   }
 }
