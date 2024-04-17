@@ -1,12 +1,12 @@
 import { APIKey, Image } from "../database";
 import { ErrorCode } from "../error-enum";
 import { generateErrorResponse } from "../utils";
-import { Magick } from "magickwand.js";
 import path from "node:path";
+import { ImageMagick } from "../image-process";
 
 export default async function UploadImage(_url: URL, request: Request) {
     let ownerUUID: string | null = null;
-    if (process.env.API_AUTH_ENABLED) {
+    if (process.env.API_AUTH_ENABLED === "true") {
         if (!request.headers.has("Authorization"))
             return generateErrorResponse(ErrorCode.MissingAuthorization, "Missing Authorization header", 401);
     }
@@ -50,10 +50,19 @@ export default async function UploadImage(_url: URL, request: Request) {
 
             try {
                 let buf = await image.arrayBuffer();
-                let blob = new Magick.Blob(buf);
-                let m = new Magick.Image(blob);
+                let uint8 = new Uint8Array(buf);
 
-                if (!m.isValid()) {
+                let m = ImageMagick.read(uint8, i => {
+                    return {
+                        format: i.format,
+                        dimension: {
+                            width: i.width,
+                            height: i.height
+                        }
+                    };
+                });
+
+                if (m.format === "UNKNOWN") {
                     return generateErrorResponse(ErrorCode.Unknown, "Invalid image", 400);
                 }
 
@@ -73,13 +82,16 @@ export default async function UploadImage(_url: URL, request: Request) {
                 return new Response(JSON.stringify({
                     id: newImage.id,
                     owner: ownerUUID,
-                    revokationToken: newImage.revokationToken
+                    revokationToken: newImage.revokationToken,
+                    imageSourceFormat: m.format,
+                    imageDimensions: m.dimension,
                 }), {
                     headers: {
                         "content-type": "application/json"
                     }
                 });
-            } catch {
+            } catch (e) {
+                console.error("upload-image: error\n", e);
                 return generateErrorResponse(ErrorCode.Unknown, "An error occurred while processing the image", 500);
             }
         }

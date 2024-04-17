@@ -1,7 +1,9 @@
 import AppAPIKey from "./api/app-api-key";
+import UploadImage from "./api/upload-image";
 
 const API: Record<string, (url: URL, request: Request) => Response | Promise<Response>> = {
-    "app-api-key": AppAPIKey
+    "app-api-key": AppAPIKey,
+    "upload-image": UploadImage
 };
 
 export async function handleRouter(url: URL, request: Request): Promise<Response> {

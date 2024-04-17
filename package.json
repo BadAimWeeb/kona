@@ -11,17 +11,18 @@
   },
   "license": "MIT",
   "dependencies": {
+    "@imagemagick/magick-wasm": "^0.0.29",
     "@types/swagger-ui-dist": "^3.30.4",
-    "magickwand.js": "^1.0.2",
     "sequelize": "^6.37.1",
     "swagger-ui-dist": "^5.12.3"
   },
   "optionalDependencies": {
     "mariadb": "^3.3.0",
-    "mysql2": "^3.9.3",
-    "pg": "^8.11.4",
+    "mysql2": "^3.9.4",
+    "pg": "^8.11.5",
     "pg-hstore": "^2.3.4",
     "sqlite3": "^5.1.7",
     "tedious": "^18.1.0"
-  }
+  },
+  "trustedDependencies": ["sqlite3"]
 }
