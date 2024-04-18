@@ -3,7 +3,7 @@ import { ErrorCode } from "../error-enum";
 import { boyerMooreStringSearch, generateErrorResponse } from "../utils";
 import path from "node:path";
 import { ImageMagick, ffprobeExec } from "../image-process";
-import { FFmpegMapping } from "../ffmpeg-codec-map";
+import { FFmpegMapping, FFmpegMappingFormat } from "../ffmpeg-codec-map";
 
 export default async function UploadImage(_url: URL, request: Request) {
     let ownerUUID: string | null = null;
@@ -102,6 +102,17 @@ export default async function UploadImage(_url: URL, request: Request) {
                             dimension: {
                                 width: videoStream.width ?? 0,
                                 height: videoStream.height ?? 0
+                            }
+                        }
+
+                        if (!m.format) {
+                            // Try remapping using container format.
+                            let containerFormat = FFmpegMappingFormat[probe.format.format_name];
+
+                            if (typeof containerFormat === "function") {
+                                m.format = await containerFormat(uint8);
+                            } else {
+                                m.format = containerFormat;
                             }
                         }
 

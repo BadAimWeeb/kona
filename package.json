@@ -15,6 +15,7 @@
     "@imagemagick/magick-wasm": "^0.0.29",
     "@types/swagger-ui-dist": "^3.30.4",
     "ffmpeg-static": "^5.2.0",
+    "file-type": "^19.0.0",
     "sequelize": "^6.37.1",
     "swagger-ui-dist": "^5.12.3"
   },

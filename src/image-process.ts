@@ -52,14 +52,22 @@ export function ffprobeExec(file: Uint8Array | string) {
             output += data;
         });
 
-        await new Promise((resolve) => {
+        await new Promise((resolve, ir) => {
             ffprobe.once('close', resolve);
             ffprobe.once('error', () => {
                 ffprobe.removeAllListeners();
                 reject();
+                ir();
             });
         });
 
-        resolve(JSON.parse(output));
+        ffprobe.removeAllListeners();
+
+        let data = JSON.parse(output) as any;
+        if (data && data.streams && data.format) {
+            resolve(data);
+        } else {
+            reject(new Error("Unsupported format."));
+        }
     });
 }

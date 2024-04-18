@@ -19,6 +19,10 @@ To run:
 bun run index.ts
 ```
 
+### Supported image formats
+
+Please see [FORMATS.md](FORMATS.md) for a list of supported image formats.
+
 ### OpenAPI Documentation
 
 Kona follows the OpenAPI 3.1 specification. You can point a Swagger UI to `/openapi.yaml` to see the documentation, or access `/docs` in any live instances.
