@@ -2,7 +2,7 @@
 
 The following image formats are guaranteed to be supported by Kona:
 
-| Format | Codec        | Code[^2] | Read | Write[^WIP_OUTPUT] |
+| Format | Codec        | Code[^1] | Read | Write[^2] |
 |--------|--------------|----------|------|--------|
 | PNG    | PNG          | PNG      | ☑    | 
 | PNG    | APNG         | APNG     | ☑    | 
@@ -11,14 +11,14 @@ The following image formats are guaranteed to be supported by Kona:
 | JXL    | JXL          | JXL      | ☑    |
 | WEBP   | WEBP         | WEBP     | ☑    |
 | AVIF   | AVIF         | AVIF     | ☑    |
-| MP4    | *ffmpeg*[^1] | MP4      | ☑    |
-| MOV    | *ffmpeg*[^1] | MOV      | ☑    |
-| 3GP    | *ffmpeg*[^1] | 3GP      | ☑    |
-| 3G2    | *ffmpeg*[^1] | 3G2      | ☑    |
+| MP4    | *ffmpeg*[^3] | MP4      | ☑    |
+| MOV    | *ffmpeg*[^3] | MOV      | ☑    |
+| 3GP    | *ffmpeg*[^3] | 3GP      | ☑    |
+| 3G2    | *ffmpeg*[^3] | 3G2      | ☑    |
 
-[^1]: Kona uses [ffmpeg](https://ffmpeg.org/) to read this format. Video codecs supported by ffmpeg (H.264, H.265, ...) are supported by Kona.
-[^2]: This code is returned on API calls.
-[^WIP_OUTPUT]: Work in progress, there is no output yet.
+[^1]: This code is returned on API calls.
+[^2]: Work in progress, there is no output yet.
+[^3]: Kona uses [ffmpeg](https://ffmpeg.org/) to read this format. Video codecs supported by ffmpeg (H.264, H.265, ...) are supported by Kona.
 
 Additionally, Kona may support additional formats that is supported by [ImageMagick](https://imagemagick.org/script/formats.php) and [ffmpeg](https://ffmpeg.org/). However, these formats not included in the list above are not guranteed to be supported.
 
