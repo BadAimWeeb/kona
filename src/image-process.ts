@@ -71,3 +71,14 @@ export function ffprobeExec(file: Uint8Array | string) {
         }
     });
 }
+
+// import InitCanvasKit from 'canvaskit-wasm/full';
+// import path from "node:path";
+// const ckWASMPath = Bun.resolveSync("canvaskit-wasm/bin/full/canvaskit.wasm", ".");
+// const ckPath = path.dirname(ckWASMPath);
+
+// const ck = await InitCanvasKit({
+//     locateFile: (file) => path.join(ckPath, file)
+// });
+
+// export const CanvasKit = ck;

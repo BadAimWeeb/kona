@@ -4,6 +4,7 @@ import { boyerMooreStringSearch, generateErrorResponse } from "../utils";
 import path from "node:path";
 import { ImageMagick, ffprobeExec } from "../image-process";
 import { FFmpegMapping, FFmpegMappingFormat } from "../ffmpeg-codec-map";
+import { Resvg } from "@resvg/resvg-js";
 
 export default async function UploadImage(_url: URL, request: Request) {
     let ownerUUID: string | null = null;
@@ -84,8 +85,25 @@ export default async function UploadImage(_url: URL, request: Request) {
                         }
                     }
                 } catch (e) {
-                    console.error("upload-image: error\n", e);
-                    retryFFmpeg = true;
+                    if (String(e).includes("'inkscape'")) {
+                        // Might be SVG.
+                        try {
+                            const svg = new Resvg(new TextDecoder().decode(uint8));
+
+                            m = {
+                                format: "SVG",
+                                dimension: {
+                                    width: svg.width,
+                                    height: svg.height
+                                }
+                            }
+                        } catch (e1) {
+                            console.error("upload-image: error", String(e1), "(SVG render attempt) - original", String(e));    
+                        }
+                    } else {
+                        console.error("upload-image: error", String(e));
+                        retryFFmpeg = true;
+                    }
                 }
 
                 if (retryFFmpeg) {
@@ -120,7 +138,7 @@ export default async function UploadImage(_url: URL, request: Request) {
                             return generateErrorResponse(ErrorCode.InvalidImageInput, "Invalid image", 400);
                         }
                     } catch (e) {
-                        console.error("upload-image-retry-ffmpeg: error\n", e);
+                        console.error("upload-image-retry-ffmpeg: error", String(e));
                         return generateErrorResponse(ErrorCode.InvalidImageInput, "Invalid image", 400);
                     }
                 }
