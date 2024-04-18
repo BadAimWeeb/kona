@@ -99,6 +99,9 @@ class Image extends Model<InferAttributes<Image, { omit: "createdAt" | "updatedA
     declare owner: string | null;
     declare ownerString: string | null;
     declare revokationToken: string | null;
+    declare width: number;
+    declare height: number;
+    declare format: string;
     declare createdAt: CreationOptional<Date>;
     declare updatedAt: CreationOptional<Date>;
 }
@@ -140,6 +143,18 @@ Image.init({
         defaultValue: () => {
             return "kona_ri_" + randomStuff(32);
         }
+    },
+    width: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    height: {
+        type: DataTypes.INTEGER,
+        allowNull: false
+    },
+    format: {
+        type: DataTypes.STRING,
+        allowNull: false
     }
 }, {
     sequelize: db,

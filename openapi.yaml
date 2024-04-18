@@ -165,6 +165,8 @@ paths:
                 required:
                   - id
                   - revokationKey
+                  - imageSourceFormat
+                  - imageDimensions
                 properties:
                   id:
                     type: string
@@ -177,17 +179,40 @@ paths:
                   revokationKey:
                     type: string
                     description: API key that can be used to delete the image
+                  imageSourceFormat:
+                    type: string
+                    description: Image source format (PNG, JPEG, JXL, APNG, etc.)
+                  imageDimensions:
+                    type: object
+                    required:
+                      - width
+                      - height
+                    properties:
+                      width:
+                        type: integer
+                        description: Image width
+                      height:
+                        type: integer
+                        description: Image height
               examples:
                 example_1:
                   value:
                     id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
                     owner: 144bb86e-be58-411c-be94-35ca1df5515e
                     revokationKey: kona_ri_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+                    imageSourceFormat: PNG
+                    imageDimensions:
+                      width: 1920
+                      height: 1080
                 example_2:
                   value:
                     id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
                     owner: null
                     revokationKey: kona_ri_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+                    imageSourceFormat: JXL
+                    imageDimensions:
+                      width: 400
+                      height: 400
         '401':
           description: Invalid Authorization header
           content:

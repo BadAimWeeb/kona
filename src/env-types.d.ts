@@ -6,6 +6,9 @@ declare global {
             MAX_FILE_SIZE: string;
             SERVER_ADDRESS: string;
 
+            FFMPEG_PATH?: string;
+            FFPROBE_PATH?: string;
+
             API_AUTH_ENABLED: "true" | "false";
             MASTER_API_KEY?: string;
 

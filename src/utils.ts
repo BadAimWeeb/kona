@@ -36,3 +36,25 @@ export async function consumeInput(request: Request) {
         throw new Error("Unsupported Content-Type");
     }
 }
+
+export function boyerMooreStringSearch(source: Uint8Array, seq: Uint8Array, start = 0) {
+    const last = seq.length - 1;
+    const skip: Record<number, number> = {};
+    for (let i = 0; i < last; i++) {
+        skip[seq[i]] = last - i;
+    }
+
+    let i = start;
+    while (i <= source.length - seq.length) {
+        let j = last;
+        while (source[i + j] === seq[j]) {
+            if (j === 0) {
+                return i;
+            }
+            j--;
+        }
+        i += skip[source[i + last]] || seq.length;
+    }
+
+    return -1;
+}

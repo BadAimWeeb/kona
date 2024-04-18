@@ -5,4 +5,5 @@ export enum ErrorCode {
     InvalidAuthorization = 4,
     MethodNotAllowed = 5,
     InvalidContentType = 6,
+    InvalidImageInput = 7
 };
