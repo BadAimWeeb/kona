@@ -10,7 +10,8 @@ The following image formats are guaranteed to be supported by Kona:
 | GIF    | GIF          | GIF      | ☑    |
 | JXL    | JXL          | JXL      | ☑    |
 | WEBP   | WEBP         | WEBP     | ☑    |
-| AVIF   | AVIF         | AVIF     | ☑    |
+| AVIF   | AV1          | AVIF     | ☑    |
+| HEIF   | HEIC         | HEIC     | ☑    |
 | MP4    | *ffmpeg*[^3] | MP4      | ☑    |
 | MOV    | *ffmpeg*[^3] | MOV      | ☑    |
 | 3GP    | *ffmpeg*[^3] | 3GP      | ☑    |
