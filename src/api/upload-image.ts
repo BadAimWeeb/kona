@@ -65,13 +65,17 @@ export default async function UploadImage(_url: URL, request: Request) {
                 let retryFFmpeg = false;
                 try {
                     m = ImageMagick.read(uint8, i => {
-                        return {
+                        let o = {
                             format: i.format,
                             dimension: {
                                 width: i.width,
                                 height: i.height
                             }
                         };
+
+                        i.dispose();
+
+                        return o;
                     });
 
                     if (m.format === "PNG") {

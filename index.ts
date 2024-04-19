@@ -2,6 +2,7 @@ import fs from "fs";
 import packageJSON from "./package.json";
 import { handleRouter } from "./src/api-router";
 import { generateErrorResponse } from "./src/utils";
+import { handleHTTPDelivery } from "./src/delivery/http";
 import Swagger from "swagger-ui-dist";
 import path from "path";
 
@@ -46,6 +47,13 @@ const httpServer = Bun.serve({
             } catch {
                 return generateErrorResponse(1, "API not found", 404);
             }
+        }
+
+        if (requestURL.pathname.startsWith("/cdn/")) {
+            let rt = await handleHTTPDelivery(requestURL, request);
+            rt.headers.set("access-control-allow-origin", "*");
+
+            return rt;
         }
 
         if (requestURL.pathname === "/openapi.yaml") {

@@ -9,56 +9,29 @@ import fs from "node:fs";
 /** 
  * Convert/render and (if required) resize an image.
  */
-export async function processImage(blob: Uint8Array, sourceFormat: MagickFormat, targetFormat: MagickFormat, width?: number, height?: number) {
+export async function processImage(blob: Uint8Array, sourceFormat: MagickFormat, targetFormat: MagickFormat, width?: number) {
     // SVG is a special case, since it's a vector format and neither FFmpeg nor ImageMagick can render it natively.
     if (sourceFormat === MagickFormat.Svg) {
-        let widthBoundOrHeightBound = width && height ? (width > height ? "width" : "height") : (width ? "width" : height ? "height" : "original");
-
-        const svg = new Resvg(new TextDecoder().decode(blob), (() => {
-            switch (widthBoundOrHeightBound) {
-                case "width":
-                    return {
-                        fitTo: {
-                            mode: "width",
-                            value: width!
-                        }
-                    };
-                case "height":
-                    return {
-                        fitTo: {
-                            mode: "height",
-                            value: height!
-                        }
-                    };
-                default:
-                    return {};
+        const svg = new Resvg(new TextDecoder().decode(blob), width ? {
+            fitTo: {
+                mode: "width",
+                value: width
             }
-        })());
+        } : {});
 
         let img = svg.render().asPng();
-        let im = ImageMagick.read(img, image => {
-            if ((width && image.width !== width) || (height && image.height !== height)) {
-                image.resize({
-                    ...(width ? { width: width!, height: image.height } : { height: height!, width: image.width }),
-                    ignoreAspectRatio: true,
-                    isPercentage: false,
-                    aspectRatio: false,
-                    x: 0,
-                    y: 0,
-                    fillArea: false,
-                    greater: false,
-                    less: false,
-                    limitPixels: false
-                });
-            }
 
+        let im = ImageMagick.read(img, image => {
             try {
                 // Uint8Array.from is used here to copy data from the ImageMagick's internal buffer.
-                return image.write(targetFormat, d => Uint8Array.from(d));
+                let d = image.write(targetFormat, d => Uint8Array.from(d));
+                return d;
             } catch (e) {
                 // TODO: ffmpeg fallback on unsupported formats
                 console.error("processImage: error", String(e));
                 return null;
+            } finally {
+                image.dispose();
             }
         });
 
@@ -71,28 +44,20 @@ export async function processImage(blob: Uint8Array, sourceFormat: MagickFormat,
 
     try {
         let im = ImageMagick.read(blob, sourceFormat, image => {
-            if ((width && image.width !== width) || (height && image.height !== height)) {
-                image.resize({
-                    ...(width ? { width: width!, height: image.height } : { height: height!, width: image.width }),
-                    ignoreAspectRatio: true,
-                    isPercentage: false,
-                    aspectRatio: false,
-                    x: 0,
-                    y: 0,
-                    fillArea: false,
-                    greater: false,
-                    less: false,
-                    limitPixels: false
-                });
+            if ((width && image.width !== width)) {
+                image.resize(width, 0);
             }
 
             try {
                 // Uint8Array.from is used here to copy data from the ImageMagick's internal buffer.
-                return image.write(targetFormat, d => Uint8Array.from(d));
+                let d = image.write(targetFormat, d => Uint8Array.from(d));
+                return d;
             } catch (e) {
                 // TODO: ffmpeg fallback on unsupported formats
                 console.error("processImage: error", String(e));
                 return null;
+            } finally {
+                image.dispose();
             }
         });
 
@@ -131,27 +96,20 @@ export async function processImage(blob: Uint8Array, sourceFormat: MagickFormat,
             let f = Bun.file(tmpPath);
 
             let im = ImageMagick.read(new Uint8Array(await f.arrayBuffer()), MagickFormat.WebP, image => {
-                if ((width && image.width !== width) || (height && image.height !== height)) {
-                    image.resize({
-                        ...(width ? { width: width!, height: image.height } : { height: height!, width: image.width }),
-                        ignoreAspectRatio: true,
-                        isPercentage: false,
-                        aspectRatio: false,
-                        x: 0,
-                        y: 0,
-                        fillArea: false,
-                        greater: false,
-                        less: false,
-                        limitPixels: false
-                    });
+                if ((width && image.width !== width)) {
+                    image.resize(width, 0);
                 }
 
                 try {
                     // Uint8Array.from is used here to copy data from the ImageMagick's internal buffer.
-                    return image.write(targetFormat, d => Uint8Array.from(d));
+                    let d = image.write(targetFormat, d => Uint8Array.from(d));
+                    return d;
                 } catch (e) {
+                    // TODO: ffmpeg fallback on unsupported formats
                     console.error("processImage: error", String(e));
                     return null;
+                } finally {
+                    image.dispose();
                 }
             });
 
