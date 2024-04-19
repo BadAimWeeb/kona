@@ -25,7 +25,7 @@ export const ImageMagick = IM;
 
 import ffmpeg from "ffmpeg-static";
 import ffprobeI from "@ffprobe-installer/ffprobe";
-export const ffmpegPath = ffmpeg; // ffmpeg-static already read the path from the environment variable.
+export const ffmpegPath = ffmpeg!; // ffmpeg-static already read the path from the environment variable.
 export const ffprobePath = process.env.FFPROBE_PATH || ffprobeI.path;
 
 import childProcess from "node:child_process";
