@@ -13,7 +13,7 @@ The following image formats are guaranteed to be supported by Kona:
 | HEIF   | AV1          | AVIF     | ⚠[^3] |           |
 | HEIF   | HEVC         | HEIC     | ⚠[^3] |           |
 | TIFF   | TIFF         | TIFF     | ☑     |           |
-| SVG    | SVG          | SVG      | ☑     |           | Output image file is determined by viewport.<br />Embedded text may not be rendered correctly due to missing fonts.
+| SVG    | SVG          | SVG      | ☑     |           | Default output image file is determined by viewport. Output will always be scaled correctly.<br />Embedded text may not be rendered correctly due to missing fonts.
 | BMP    | BMP          | BMP3     | ☑     |           | BMP has multiple version. Look out for BMP and BMP2.<br />Only tested with Windows 11 generated BMP files.
 | MP4    | *FFmpeg*[^5] | MP4      | ⚠[^3] |           | [^6]
 | MOV    | *FFmpeg*[^5] | MOV      | ⚠[^3] |           | [^6]

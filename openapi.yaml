@@ -45,8 +45,8 @@ paths:
                 examples:
                   - key: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
                     uuid: 144bb86e-be58-411c-be94-35ca1df5515e
-        '401':
-          description: Invalid Authorization header
+        '4XX':
+          description: Input error
           content:
             application/json:
               schema:
@@ -92,8 +92,8 @@ paths:
                 examples:
                   - key: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
                     uuid: 144bb86e-be58-411c-be94-35ca1df5515e
-        '401':
-          description: Invalid Authorization header
+        '4XX':
+          description: Input error
           content:
             application/json:
               schema:
@@ -136,8 +136,8 @@ paths:
                     description: Message
                 required:
                   - message
-        '401':
-          description: Invalid Authorization header
+        '4XX':
+          description: Input error
           content:
             application/json:
               schema:
@@ -147,6 +147,16 @@ paths:
       tags: 
         - authenticated
       summary: Upload a new image
+      description: |
+        Upload a new image to server for further processing and delivering.
+        
+        If server disabled config `API_AUTH_ENABLED`, anyone can upload to the server (which is not recommended) as orphaned image (no owner) and can only be deleted using `revokationKey` or `MASTER_API_KEY`.
+
+        In case you intentionally disable `API_AUTH_ENABLED`, make sure you have a rate-limit enforced per IP to prevent abuse. Kona does not have config for this yet.
+
+        Using `MASTER_API_KEY` to upload will also make the image orphaned.
+
+        Images can be accessed by accessing `/cdn/{id}?width={width}` (with desired format extension, and width is optional). This is subject to change ⚠️.
       operationId: uploadNewImage
       requestBody:
         description: multipart/form-data MUST be used to transfer files.
@@ -213,13 +223,110 @@ paths:
                     imageDimensions:
                       width: 400
                       height: 400
-        '401':
-          description: Invalid Authorization header
+        '4XX':
+          description: Input error
           content:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
-    
+  /api/list-image:
+    get:
+      tags:
+        - authenticated
+      summary: List owned images
+      description: |
+        This API requires an API key even if `API_AUTH_ENABLED` is disabled.
+
+        Will return a list of images ID and their metadata, along with next page cursor (if there is more).
+
+        If using `MASTER_API_KEY`, this API will return everything server has known, otherwise it will only return owned images.
+
+        Default return limit is 10. Maximum return limit is 100.
+      operationId: listOwnedImages
+      parameters: 
+        - in: query
+          name: limit
+          schema:
+            type: number
+            minimum: 1
+            maximum: 100
+        - in: query
+          name: cursor
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Successful operation
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - images
+                properties:
+                  images:
+                    type: array
+                    items: 
+                      type: object
+                      required:
+                        - id
+                        - createdAt
+                        - sourceFormat
+                        - sourceDimensions
+                      properties:
+                        id:
+                          type: string
+                          description: ID of the image
+                          format: uuid
+                        ownerUUID:
+                          type: string
+                          description: ID of current owner if not deleted. Can be null.
+                          format: uuid
+                        originalOwnerUUID:
+                          type: string
+                          description: ID of owner before deletion, useful for filtering and deletion. Can be null.
+                          format: uuid
+                        createdAt:
+                          type: number
+                          description: Timestamp when this image is created in unix milliseconds.
+                          examples: 
+                            - 1713649407434
+                        sourceFormat:
+                          type: string
+                          description: Original format of this image when received. Check [FORMATS.md](https://github.com/BadAimWeeb/kona/blob/main/FORMATS.md) (column **_Code_**) to get possible return value.
+                          examples:
+                            - PNG
+                            - JPEG
+                            - JXL
+                            - HEIC
+                            - AVIF
+                            - GIF
+                            - WEBP
+                        sourceDimensions:
+                          type: object
+                          properties:
+                            width:
+                              type: integer
+                              description: Width of the source image.
+                              examples:
+                                - 1920
+                            height:
+                              type: integer
+                              description: Height of the source image.
+                              examples:
+                                - 1080
+                  nextCursor:
+                    type: string
+                    description: Next page cursor if there is more, otherwise it's null. **DO NOT ASSUME FORMAT FOR THIS**.
+                    examples:
+                      - CURSOR_SOMETHING_DO_NOT_ASSUME_FORMAT                                        
+        '4XX':
+          description: Input error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
+
 components:
   securitySchemes:
     api_key:
@@ -247,6 +354,8 @@ components:
             - 4: Invalid Authorization header
             - 5: Method not allowed
             - 6: Invalid Content-Type header
+            - 7: Invalid image input
+            - 8: Invalid query
         kona_version:
           type: string
           description: Kona version this server is running

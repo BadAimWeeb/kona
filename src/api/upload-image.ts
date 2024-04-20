@@ -20,16 +20,20 @@ export default async function UploadImage(_url: URL, request: Request) {
     if (auth) {
         let key = auth.slice(7);
 
-        let apiObject = await APIKey.findOne({
-            where: {
-                key
-            }
-        });
+        if (process.env.API_AUTH_ENABLED === "true" && process.env.MASTER_API_KEY && key === process.env.MASTER_API_KEY) {
+            ownerUUID = null; // master key does not have an owner
+        } else {
+            let apiObject = await APIKey.findOne({
+                where: {
+                    key
+                }
+            });
 
-        if (!apiObject)
-            return generateErrorResponse(ErrorCode.InvalidAuthorization, "Invalid Authorization header", 401);
+            if (!apiObject)
+                return generateErrorResponse(ErrorCode.InvalidAuthorization, "Invalid Authorization header", 401);
 
-        ownerUUID = apiObject.uuid;
+            ownerUUID = apiObject.uuid;
+        }
     }
 
     switch (request.method) {
@@ -102,7 +106,7 @@ export default async function UploadImage(_url: URL, request: Request) {
                                 }
                             }
                         } catch (e1) {
-                            console.error("upload-image: error", String(e1), "(SVG render attempt) - original", String(e));    
+                            console.error("upload-image: error", String(e1), "(SVG render attempt) - original", String(e));
                         }
                     } else {
                         console.error("upload-image: error", String(e));
