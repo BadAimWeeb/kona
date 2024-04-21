@@ -6,6 +6,9 @@ import { ImageMagick, ffprobeExec } from "../image-process";
 import { FFmpegMapping, FFmpegMappingFormat } from "../ffmpeg-codec-map";
 import { Resvg } from "@resvg/resvg-js";
 
+const MAXIMUM_EDGE = isNaN(Number(process.env.MAX_IMAGE_EDGE)) ? 0 : Number(process.env.MAX_IMAGE_EDGE);
+const MAXIMUM_PIXELS = isNaN(Number(process.env.MAX_IMAGE_PIXELS)) ? 0 : Number(process.env.MAX_IMAGE_HEIGHT);
+
 export default async function UploadImage(_url: URL, request: Request) {
     let ownerUUID: string | null = null;
     if (process.env.API_AUTH_ENABLED === "true") {
@@ -58,6 +61,7 @@ export default async function UploadImage(_url: URL, request: Request) {
                 let buf = await image.arrayBuffer();
                 let uint8 = new Uint8Array(buf);
 
+                // TODO: refactor and move this to a separate function
                 let m: {
                     format: string,
                     dimension: {
@@ -155,6 +159,15 @@ export default async function UploadImage(_url: URL, request: Request) {
 
                 if (m.format === "UNKNOWN") {
                     return generateErrorResponse(ErrorCode.InvalidImageInput, "Invalid image", 400);
+                }
+
+                let pixels = m.dimension.width * m.dimension.height;
+                if (MAXIMUM_PIXELS && pixels > MAXIMUM_PIXELS) {
+                    return generateErrorResponse(ErrorCode.InvalidImageInput, `Image resolution too high (maximum ${MAXIMUM_PIXELS}, got ${pixels})`, 413);
+                }
+
+                if (MAXIMUM_EDGE && (m.dimension.width > MAXIMUM_EDGE || m.dimension.height > MAXIMUM_EDGE)) {
+                    return generateErrorResponse(ErrorCode.InvalidImageInput, `Image dimension too high (maximum edge ${MAXIMUM_EDGE}, got ${m.dimension.width}x${m.dimension.height})`, 413);
                 }
 
                 let server = process.env.SERVER_ADDRESS;

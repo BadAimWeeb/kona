@@ -304,6 +304,9 @@ paths:
                             - WEBP
                         sourceDimensions:
                           type: object
+                          required:
+                            - width
+                            - height
                           properties:
                             width:
                               type: integer
