@@ -9,6 +9,9 @@ import { Resvg } from "@resvg/resvg-js";
 const MAXIMUM_EDGE = isNaN(Number(process.env.MAX_IMAGE_EDGE)) ? 0 : Number(process.env.MAX_IMAGE_EDGE);
 const MAXIMUM_PIXELS = isNaN(Number(process.env.MAX_IMAGE_PIXELS)) ? 0 : Number(process.env.MAX_IMAGE_HEIGHT);
 
+const CONSTANT_IDAT = new TextEncoder().encode("IDAT");
+const CONSTANT_ACTL = new TextEncoder().encode("acTL");
+
 export default async function UploadImage(_url: URL, request: Request) {
     let ownerUUID: string | null = null;
     if (process.env.API_AUTH_ENABLED === "true") {
@@ -26,6 +29,10 @@ export default async function UploadImage(_url: URL, request: Request) {
         if (process.env.API_AUTH_ENABLED === "true" && process.env.MASTER_API_KEY && key === process.env.MASTER_API_KEY) {
             ownerUUID = null; // master key does not have an owner
         } else {
+            if (!key.startsWith("kona_sk_")) {
+                return generateErrorResponse(ErrorCode.InvalidAuthorization, "Invalid Authorization header", 401);
+            }
+
             let apiObject = await APIKey.findOne({
                 where: {
                     key
@@ -89,8 +96,8 @@ export default async function UploadImage(_url: URL, request: Request) {
                     if (m.format === "PNG") {
                         // ImageMagick does not detect APNG since it only assumes PNG and does not read subsequent chunks.
                         // This is a workaround to detect APNG. ffmpeg is used here since ImageMagick cannot read and detect APNG natively.
-                        let idatPos = boyerMooreStringSearch(uint8, new TextEncoder().encode("IDAT"));
-                        let actlPos = boyerMooreStringSearch(uint8, new TextEncoder().encode("acTL"));
+                        let idatPos = boyerMooreStringSearch(uint8, CONSTANT_IDAT);
+                        let actlPos = boyerMooreStringSearch(uint8, CONSTANT_ACTL);
 
                         if (actlPos + 1 && idatPos + 1 && actlPos < idatPos) {
                             retryFFmpeg = true;
