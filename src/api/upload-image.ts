@@ -53,6 +53,12 @@ export default async function UploadImage(_url: URL, request: Request) {
 
             let formData = await request.formData();
             let image = formData.get("image");
+            let disableResizingF = formData.get("disableResizing");
+
+            let disableResizing = false;
+            if (typeof disableResizingF === "string") {
+                disableResizing = disableResizingF === "1";
+            }
 
             if (!(image instanceof File))
                 return generateErrorResponse(ErrorCode.Unknown, "Missing required parameters: image", 400);
@@ -186,7 +192,8 @@ export default async function UploadImage(_url: URL, request: Request) {
                     ownerString: ownerUUID,
                     width: m.dimension.width,
                     height: m.dimension.height,
-                    format: m.format
+                    format: m.format,
+                    disableResizing
                 });
 
                 let fp = path.join(process.env.LOCAL_STORAGE_PATH, "image", newImage.id);

@@ -402,9 +402,18 @@ components:
         - key: kona_sk_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
     upload_image:
       type: object
+      required:
+        - image
       properties:
         image:
           type: string
           format: binary
+        disableResizing:
+          type: string
+          description: |-
+            If this value is set to `1`, the server will not resize/convert the image when follow-up request is made.
+            This is useful for uploading images that are already in the desired format and size, 
+            and you want to save some processing time for every request.
+
 security: 
 - api_key: []

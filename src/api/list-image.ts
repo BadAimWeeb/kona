@@ -14,20 +14,32 @@ export default async function MasterAPIKey(url: URL, request: Request) {
     let key = auth.slice(7);
 
     let ownerUUID: string | null = null;
+    let imageKeyQuery: Image | null = null;
     // Check if request uses master key
     if (process.env.MASTER_API_KEY && (key === process.env.MASTER_API_KEY)) {
         ownerUUID = null; // master key can see everything
     } else {
-        let apiObject = await APIKey.findOne({
-            where: {
-                key
-            }
-        });
+        if (key.startsWith("kona_sk_")) {
+            let apiObject = await APIKey.findOne({
+                where: {
+                    key
+                }
+            });
 
-        if (!apiObject)
-            return generateErrorResponse(ErrorCode.InvalidAuthorization, "Invalid Authorization header", 401);
+            if (!apiObject)
+                return generateErrorResponse(ErrorCode.InvalidAuthorization, "Invalid Authorization header", 401);
 
-        ownerUUID = apiObject.uuid;
+            ownerUUID = apiObject.uuid;
+        } else if (key.startsWith("kona_ri_")) {
+            imageKeyQuery = await Image.findOne({
+                where: {
+                    revokationToken: key
+                }
+            });
+
+            if (!imageKeyQuery)
+                return generateErrorResponse(ErrorCode.InvalidAuthorization, "Invalid Authorization header", 401);
+        }
     }
 
     switch (request.method) {
@@ -63,8 +75,8 @@ export default async function MasterAPIKey(url: URL, request: Request) {
 
             queryObj.order = [["createdAt", "DESC"]];
 
-            let images = await Image.findAll(queryObj);
-            let nextCursor = images.length === limit ? images.at(-1)!.createdAt.getTime().toString() : null;
+            let images = imageKeyQuery ? [imageKeyQuery] : await Image.findAll(queryObj);
+            let nextCursor = imageKeyQuery ? null : (images.length === limit ? images.at(-1)!.createdAt.getTime().toString() : null);
 
             return new Response(JSON.stringify({
                 images: images.map((img) => {

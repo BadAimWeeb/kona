@@ -97,11 +97,17 @@ class Image extends Model<InferAttributes<Image, { omit: "createdAt" | "updatedA
     declare id: string;
     declare server: string;
     declare owner: string | null;
+    /** This string retains even when owner link is broken. */
     declare ownerString: string | null;
     declare revokationToken: string | null;
+    /** Width of the source image. */
     declare width: number;
+    /** Height of the source image. */
     declare height: number;
+    /** Format/codec of the source image. */
     declare format: string;
+    /** Disable resizing and conversion for this image. Useful if you already know the target dimension/format and only intend to use that only target. */
+    declare disableResizing: boolean;
     declare createdAt: CreationOptional<Date>;
     declare updatedAt: CreationOptional<Date>;
 }
@@ -155,6 +161,11 @@ Image.init({
     format: {
         type: DataTypes.STRING,
         allowNull: false
+    },
+    disableResizing: {
+        type: DataTypes.BOOLEAN,
+        allowNull: false,
+        defaultValue: false
     }
 }, {
     sequelize: db,

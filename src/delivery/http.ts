@@ -60,8 +60,29 @@ export async function handleHTTPDelivery(url: URL, request: Request): Promise<Re
     }
 
     let buf = fs.readFileSync(path.join(process.env.LOCAL_STORAGE_PATH, "image", image.id));
+    let targetWidth = url.searchParams.has("width") ? +url.searchParams.get("width")! : void 0;
     try {
-        let t = await processImage(buf, image.format as unknown as MagickFormat, m, url.searchParams.has("width") ? +url.searchParams.get("width")! : void 0);
+        if (image.disableResizing) {
+            if (image.format !== m) {
+                return new Response(`Sorry, Kona cannot process the requested file.\n\nKona v${packageJSON.version} - https://github.com/BadAimWeeb/kona`, {
+                    status: 400,
+                    headers: {
+                        "content-type": "text/plain"
+                    }
+                });
+            }
+
+            if (targetWidth && targetWidth !== image.width) {
+                return new Response(`Sorry, Kona cannot process the requested file.\n\nKona v${packageJSON.version} - https://github.com/BadAimWeeb/kona`, {
+                    status: 400,
+                    headers: {
+                        "content-type": "text/plain"
+                    }
+                });
+            }
+        }
+
+        let t = await processImage(buf, image.format as unknown as MagickFormat, m, image.width, );
         let mime = FormatToMIME[m];
 
         return new Response(t, {

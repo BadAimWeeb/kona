@@ -9,7 +9,12 @@ import fs from "node:fs";
 /** 
  * Convert/render and (if required) resize an image.
  */
-export async function processImage(blob: Uint8Array, sourceFormat: MagickFormat, targetFormat: MagickFormat, width?: number) {
+export async function processImage(blob: Uint8Array, sourceFormat: MagickFormat, targetFormat: MagickFormat, sourceWidth: number, width?: number) {
+    // Fast return if the image is already in the target format and no resizing is required.
+    if (sourceFormat === targetFormat && (!width || sourceWidth === width)) {
+        return blob;
+    }
+
     // SVG is a special case, since it's a vector format and neither FFmpeg nor ImageMagick can render it natively.
     if (sourceFormat === MagickFormat.Svg) {
         const svg = new Resvg(new TextDecoder().decode(blob), width ? {
