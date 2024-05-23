@@ -6,6 +6,10 @@ declare global {
             MAX_FILE_SIZE: string;
             SERVER_ADDRESS: string;
 
+            MAX_IMAGE_PIXELS: string;
+            MAX_IMAGE_EDGE: string;
+            MAX_OUTPUT_IMAGE_EDGE: string;
+
             FFMPEG_PATH?: string;
             FFPROBE_PATH?: string;
 

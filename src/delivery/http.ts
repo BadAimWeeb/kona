@@ -82,7 +82,7 @@ export async function handleHTTPDelivery(url: URL, request: Request): Promise<Re
             }
         }
 
-        let t = await processImage(buf, image.format as unknown as MagickFormat, m, image.width, );
+        let t = await processImage(buf, image.format as unknown as MagickFormat, m, image.width, targetWidth);
         let mime = FormatToMIME[m];
 
         return new Response(t, {

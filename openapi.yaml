@@ -329,6 +329,110 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+  /api/resize-and-convert:
+    post:
+      tags:
+        - authenticated
+      summary: Resize and convert an image
+      description: |
+        Resize and convert an image to a new format and size.
+        
+        If server disabled config `API_AUTH_ENABLED`, anyone can resize and convert the image (which is not recommended) as orphaned image (no owner) and can only be deleted using `revokationKey` or `MASTER_API_KEY`.
+
+        In case you intentionally disable `API_AUTH_ENABLED`, make sure you have a rate-limit enforced per IP to prevent abuse. Kona does not have config for this yet.
+
+        Using `MASTER_API_KEY` to resize and convert will also make the image orphaned.
+
+        Images can be accessed by accessing `/cdn/{id}`. This is subject to change ⚠️. Resizing and converting already pre-processed image will not be processed again.
+      operationId: resizeAndConvertImage
+      requestBody:
+        description: |
+          Supplies the image ID, new format, and new size.
+          
+          If `newWidth` is not supplied, the server will resize the image to the same aspect ratio as the original image.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - uuid
+                - newFormat
+              properties:
+                uuid:
+                  type: string
+                  format: uuid
+                  description: ID of the image
+                newFormat:
+                  type: string
+                  description: New format of the image
+                newWidth:
+                  type: integer
+                  description: New width of the image
+      responses:
+        '200':
+          description: Successful operation, will return image information including revokation key.
+          content:
+            application/json:
+              schema:
+                type: object
+                required:
+                  - id
+                  - revokationKey
+                  - imageSourceFormat
+                  - imageDimensions
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                    description: Image UUID
+                  owner:
+                    type: string
+                    format: uuid
+                    description: Owner UUID (a.k.a API key UUID), can be null if server does not require API key to upload
+                  revokationKey:
+                    type: string
+                    description: API key that can be used to delete the image
+                  imageSourceFormat:
+                    type: string
+                    description: Image source format (PNG, JPEG, JXL, APNG, etc.)
+                  imageDimensions:
+                    type: object
+                    required:
+                      - width
+                      - height
+                    properties:
+                      width:
+                        type: integer
+                        description: Image width
+                      height:
+                        type: integer
+                        description: Image height
+              examples:
+                example_1:
+                  value:
+                    id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    owner: 144bb86e-be58-411c-be94-35ca1df5515e
+                    revokationKey: kona_ri_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+                    imageSourceFormat: PNG
+                    imageDimensions:
+                      width: 1920
+                      height: 1080
+                example_2:
+                  value:
+                    id: 3fa85f64-5717-4562-b3fc-2c963f66afa6
+                    owner: null
+                    revokationKey: kona_ri_MDEyMzAxMjMwMTIzMDEyMzAxMjMwMTIzMDEyMzAxMjM
+                    imageSourceFormat: JXL
+                    imageDimensions:
+                      width: 400
+                      height: 400
+        '4XX':
+          description: Input error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
 
 components:
   securitySchemes:

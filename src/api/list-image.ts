@@ -39,6 +39,8 @@ export default async function MasterAPIKey(url: URL, request: Request) {
 
             if (!imageKeyQuery)
                 return generateErrorResponse(ErrorCode.InvalidAuthorization, "Invalid Authorization header", 401);
+        } else {
+            return generateErrorResponse(ErrorCode.InvalidAuthorization, "Invalid Authorization header", 401);
         }
     }
 
