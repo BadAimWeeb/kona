@@ -10,7 +10,7 @@ info:
     url: https://github.com/BadAimWeeb/kona/blob/main/LICENSE
   version: 0.0.1
 servers:
-  - url: https
+  - url: /
 tags:
   - name: master
     description: Endpoint only master API key can use, authenticate with value configured at `MASTER_API_KEY` in the server.
