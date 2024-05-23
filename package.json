@@ -29,5 +29,14 @@
     "sqlite3": "^5.1.7",
     "tedious": "^18.1.0"
   },
-  "trustedDependencies": ["ffmpeg-static", "@ffprobe-installer/ffprobe", "sqlite3"]
+  "trustedDependencies": [
+    "ffmpeg-static", 
+    "@ffprobe-installer/darwin-arm64",
+    "@ffprobe-installer/darwin-x64",
+    "@ffprobe-installer/linux-arm",
+    "@ffprobe-installer/linux-arm64",
+    "@ffprobe-installer/linux-x64",
+    "@ffprobe-installer/linux-ia32",
+    "sqlite3"
+  ]
 }
