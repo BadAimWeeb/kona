@@ -80,7 +80,7 @@ const httpServer = Bun.serve({
                     window.onload = function() {
                         window.ui = SwaggerUIBundle({
                             //url: "${requestURL.protocol}//${requestURL.hostname}${requestURL.port !== (requestURL.protocol === "https:" ? "443" : "80") ? (":" + requestURL.port) : ""}/openapi.yaml",
-                            url: "/docs/openapi.yaml",
+                            url: "/openapi.yaml",
                             dom_id: '#swagger-ui',
                             deepLinking: true,
                             presets: [
