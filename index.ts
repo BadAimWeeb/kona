@@ -56,12 +56,14 @@ const httpServer = Bun.serve({
             return rt;
         }
 
-        // if (requestURL.pathname === "/openapi.yaml") {
-        //     let oapi = fs.readFileSync("./openapi.yaml", "utf-8");
-        //     return new Response(oapi.replace("- url: https", `- url: ${requestURL.protocol}//${requestURL.hostname}${requestURL.port !== (requestURL.protocol === "https:" ? "443" : "80") ? (":" + requestURL.port) : ""}`), {
-        //         headers: { 'content-type': 'application/yaml', 'access-control-allow-origin': '*' }
-        //     });
-        // }
+        if (requestURL.pathname === "/openapi.yaml") {
+            let oapi = fs.readFileSync("./openapi.yaml", "utf-8");
+            return new Response(oapi
+                // .replace("- url: https", `- url: ${requestURL.protocol}//${requestURL.hostname}${requestURL.port !== (requestURL.protocol === "https:" ? "443" : "80") ? (":" + requestURL.port) : ""}`)
+                , {
+                headers: { 'content-type': 'application/yaml', 'access-control-allow-origin': '*' }
+            });
+        }
 
         // this code kinda sucks
         if (requestURL.pathname.startsWith("/docs/") || requestURL.pathname === "/docs") {
