@@ -433,6 +433,47 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/error'
+  /api/delete-image:
+    delete:
+      tags:
+        - authenticated
+      summary: Delete an image
+      description: Delete an image.
+      operationId: deleteImage
+      requestBody:
+        description: Supplies the image ID.
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              required:
+                - uuid
+              properties:
+                uuid:
+                  type: string
+                  format: uuid
+                  description: ID of the image
+      responses:
+        '200':
+          description: Successful operation, will delete the image.
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    default: Image deleted
+                    description: Message
+                required:
+                  - message
+        '4XX':
+          description: Input error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/error'
 
 components:
   securitySchemes:
