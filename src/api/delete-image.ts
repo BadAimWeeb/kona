@@ -1,6 +1,8 @@
 import { APIKey, Image } from "../database";
 import { ErrorCode } from "../error-enum";
 import { consumeInput, generateErrorResponse } from "../utils";
+import fs from "node:fs";
+import path from "node:path";
 
 export default async function DeleteImage(url: URL, request: Request) {
     if (!request.headers.has("Authorization"))
@@ -62,6 +64,8 @@ export default async function DeleteImage(url: URL, request: Request) {
             if (!image)
                 return generateErrorResponse(ErrorCode.NotFound, "Image not found", 404);
 
+            await fs.promises.unlink(path.join(process.env.LOCAL_STORAGE_PATH, "image", image.id))
+                .catch(() => {}); // ignore errors
             await image.destroy();
 
             return new Response(JSON.stringify({
