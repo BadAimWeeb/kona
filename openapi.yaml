@@ -363,10 +363,10 @@ paths:
                   type: string
                   format: uuid
                   description: ID of the image
-                newFormat:
+                targetFormat:
                   type: string
                   description: New format of the image
-                newWidth:
+                targetWidth:
                   type: integer
                   description: New width of the image
       responses:
